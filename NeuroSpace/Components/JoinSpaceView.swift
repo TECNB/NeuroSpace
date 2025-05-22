@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct JoinSpaceView: View {
-    @Environment(\.dismiss) private var dismiss
+    // 替换环境变量dismiss为自定义回调
+    var onDismiss: () -> Void
     
     @State private var inviteCode: String = ""
     @State private var isSearching: Bool = false
@@ -25,11 +26,24 @@ struct JoinSpaceView: View {
     
     var body: some View {
         VStack(spacing: 20) {
-            // 标题
-            Text("加入思维空间")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-                .padding(.top, 20)
+            // 标题和关闭按钮
+            HStack {
+                Text("加入思维空间")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                
+                Spacer()
+                
+                Button {
+                    onDismiss()
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.title2)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .padding(.top, 20)
+            .padding(.horizontal)
             
             // 选项卡
             Picker("加入方式", selection: $selectedTab) {
@@ -126,7 +140,7 @@ struct JoinSpaceView: View {
             
             // 底部按钮
             Button("取消") {
-                dismiss()
+                onDismiss()
             }
             .buttonStyle(.bordered)
             .tint(.secondary)
@@ -156,7 +170,7 @@ struct JoinSpaceView: View {
     private func joinWithCode() {
         // 实现加入空间的逻辑
         print("使用邀请码加入: \(inviteCode)")
-        dismiss()
+        onDismiss()
     }
     
     // 加入公开空间
@@ -164,7 +178,7 @@ struct JoinSpaceView: View {
         if let space = selectedPublicSpace {
             // 实现加入公开空间的逻辑
             print("加入公开空间: \(space.name)")
-            dismiss()
+            onDismiss()
         }
     }
 }
@@ -286,5 +300,5 @@ let samplePublicSpaces = [
 ]
 
 #Preview {
-    JoinSpaceView()
+    JoinSpaceView(onDismiss: {})
 } 

@@ -11,7 +11,9 @@ struct SpaceCard: View {
     var space: CollaborationSpace
     var isSelected: Bool = false
     
+    
     @State private var isHovering: Bool = false
+    @Environment(\.openImmersiveSpace) var openImmersiveSpace
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -107,6 +109,9 @@ struct SpaceCard: View {
                     // 进入按钮
                     Button {
                         // 进入空间操作
+                        Task {
+                            await openImmersiveSpace(id: "ImmersiveSpace")
+                        }
                     } label: {
                         HStack(spacing: 4) {
                             Text("进入")

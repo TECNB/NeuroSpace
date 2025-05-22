@@ -29,6 +29,7 @@ struct ImmersiveView: View {
                     addMindMapNodes(to: content)
                 }
             }
+//            .environment(www\.backgroundMaterial, .hidden) // 设置背景为透明
             
             // 浮动控制面板
             if showControlPanel {
@@ -133,7 +134,7 @@ struct ImmersiveView: View {
         let centerNodeMesh = MeshResource.generateSphere(radius: 0.2)
         let centerNodeMaterial = SimpleMaterial(color: .blue, isMetallic: true)
         let centerNode = ModelEntity(mesh: centerNodeMesh, materials: [centerNodeMaterial])
-        centerNode.position = [0, 0, 0]
+        centerNode.position = [0, 1.2, 0] // 将中心节点位置提高
         
         // 添加节点文本
         let textMesh = MeshResource.generateText("NeuroSpace",

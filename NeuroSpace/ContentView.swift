@@ -15,6 +15,8 @@ struct ContentView: View {
     @State private var selectedSpaceID: String? = nil
     @State private var showCreateNewSpace: Bool = false
     @State private var showJoinSpace: Bool = false
+    
+    @Environment(\.openImmersiveSpace) var openImmersiveSpace
 
     var body: some View {
         ZStack {
@@ -89,13 +91,42 @@ struct ContentView: View {
                 .padding(.bottom, 30)
             }
             .padding()
+            
+            // 使用覆盖层代替sheet - 创建新空间
+            if showCreateNewSpace {
+                Color.black.opacity(0.3)
+                    .ignoresSafeArea()
+                    .transition(.opacity)
+                    .onTapGesture {
+                        // 允许通过点击背景关闭视图
+                        showCreateNewSpace = false
+                    }
+                
+                CreateNewSpaceView(onDismiss: {
+                    showCreateNewSpace = false
+                })
+                    
+                    .zIndex(1)
+            }
+            
+            // 使用覆盖层代替sheet - 加入空间
+            if showJoinSpace {
+                Color.black.opacity(0.3)
+                    .ignoresSafeArea()
+                    .transition(.opacity)
+                    .onTapGesture {
+                        showJoinSpace = false
+                    }
+                
+                JoinSpaceView(onDismiss: {
+                    showJoinSpace = false
+                })
+                    .transition(.scale.combined(with: .opacity))
+                    .zIndex(1)
+            }
         }
-        .sheet(isPresented: $showCreateNewSpace) {
-            CreateNewSpaceView()
-        }
-        .sheet(isPresented: $showJoinSpace) {
-            JoinSpaceView()
-        }
+        .animation(.spring, value: showCreateNewSpace)
+        .animation(.spring, value: showJoinSpace)
     }
 }
 

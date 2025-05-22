@@ -8,29 +8,57 @@
 import SwiftUI
 
 struct CreateNewSpaceView: View {
-    @Environment(\.dismiss) private var dismiss
+    // 替换环境变量dismiss为自定义回调
+    var onDismiss: () -> Void
     
     @State private var spaceName: String = ""
     @State private var spaceDescription: String = ""
     @State private var selectedTemplate: String = "empty"
     @State private var isPublic: Bool = false
     
+    // 添加焦点状态管理
+    @FocusState private var focusedField: Field?
+    
+    // 定义可聚焦的字段
+    enum Field {
+        case name, description
+    }
+    
     var body: some View {
         VStack {
-            // 标题
-            Text("创建新思维空间")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-                .padding(.top, 20)
+            // 标题和关闭按钮
+            HStack {
+                Text("创建新思维空间")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                
+                Spacer()
+                
+                Button {
+                    // 清除焦点并关闭视图
+                    focusedField = nil
+                    onDismiss()
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.title2)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .padding(.top, 20)
+            .padding(.horizontal)
             
-            // 表单
-            Form {
-                Section {
+            // 使用VStack替代Form
+            VStack(spacing: 20) {
+                // 基本信息
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("基本信息").font(.headline).foregroundStyle(.secondary)
+                    
                     TextField("空间名称", text: $spaceName)
                         .textFieldStyle(.plain)
                         .padding()
                         .background(.ultraThinMaterial)
                         .cornerRadius(12)
+                        .focused($focusedField, equals: .name) // 添加焦点绑定
                     
                     TextField("空间描述", text: $spaceDescription)
                         .textFieldStyle(.plain)
@@ -38,10 +66,14 @@ struct CreateNewSpaceView: View {
                         .background(.ultraThinMaterial)
                         .cornerRadius(12)
                         .frame(height: 80)
+                        .focused($focusedField, equals: .description) // 添加焦点绑定
                 }
-                .listRowBackground(Color.clear)
+                .padding(.horizontal)
                 
-                Section(header: Text("模板选择").foregroundStyle(.secondary)) {
+                // 模板选择
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("模板选择").font(.headline).foregroundStyle(.secondary)
+                    
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 16) {
                             ForEach(templateOptions, id: \.id) { template in
@@ -50,6 +82,8 @@ struct CreateNewSpaceView: View {
                                     isSelected: selectedTemplate == template.id
                                 )
                                 .onTapGesture {
+                                    // 点击模板时清除文本框焦点
+                                    focusedField = nil
                                     selectedTemplate = template.id
                                 }
                             }
@@ -57,30 +91,46 @@ struct CreateNewSpaceView: View {
                         .padding(.vertical, 8)
                     }
                 }
-                .listRowBackground(Color.clear)
+                .padding(.horizontal)
                 
-                Section {
+                // 设置选项
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("设置选项").font(.headline).foregroundStyle(.secondary)
+                    
                     Toggle("公开空间", isOn: $isPublic)
                         .padding()
                         .background(.ultraThinMaterial)
                         .cornerRadius(12)
+                        .onChange(of: isPublic) { oldValue, newValue in
+                            // 切换开关时清除文本框焦点
+                            focusedField = nil
+                        }
                 }
-                .listRowBackground(Color.clear)
+                .padding(.horizontal)
             }
-            .scrollContentBackground(.hidden)
+            .padding(.vertical)
+            .onTapGesture {
+                // 点击表单背景时清除焦点
+                focusedField = nil
+            }
+            
+            Spacer()
             
             // 按钮
             HStack(spacing: 20) {
                 Button("取消") {
-                    dismiss()
+                    // 清除焦点并关闭视图
+                    focusedField = nil
+                    onDismiss()
                 }
                 .buttonStyle(.bordered)
                 .tint(.secondary)
                 
                 Button {
                     // 创建空间逻辑
+                    focusedField = nil
                     createSpace()
-                    dismiss()
+                    onDismiss()
                 } label: {
                     Text("创建空间")
                         .frame(minWidth: 120)
@@ -95,6 +145,13 @@ struct CreateNewSpaceView: View {
         .background(.ultraThinMaterial)
         .cornerRadius(24)
         .glassBackgroundEffect()
+        // 添加手势识别器，防止背景点击事件传播
+        .contentShape(Rectangle())
+        .simultaneousGesture(TapGesture().onEnded {})
+        .onTapGesture {
+            // 点击背景时清除焦点
+            focusedField = nil
+        }
     }
     
     // 创建空间
@@ -166,5 +223,5 @@ struct VisualEffectView: UIViewRepresentable {
 }
 
 #Preview {
-    CreateNewSpaceView()
+    CreateNewSpaceView(onDismiss: {})
 } 

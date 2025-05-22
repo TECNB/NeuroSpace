@@ -23,6 +23,7 @@ struct NeuroSpaceApp: App {
         ImmersiveSpace(id: appModel.immersiveSpaceID) {
             ImmersiveView()
                 .environment(appModel)
+                .background(Color.clear)
                 .onAppear {
                     appModel.immersiveSpaceState = .open
                 }
